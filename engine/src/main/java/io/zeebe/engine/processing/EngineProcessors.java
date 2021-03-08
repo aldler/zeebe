@@ -21,7 +21,7 @@ import io.zeebe.engine.processing.deployment.distribute.DeploymentDistributeProc
 import io.zeebe.engine.processing.deployment.distribute.DeploymentDistributor;
 import io.zeebe.engine.processing.deployment.distribute.DeploymentRedistributor;
 import io.zeebe.engine.processing.incident.IncidentEventProcessors;
-import io.zeebe.engine.processing.job.JobEventProcessors;
+import io.zeebe.engine.processing.job.JobCommandProcessors;
 import io.zeebe.engine.processing.message.MessageEventProcessors;
 import io.zeebe.engine.processing.message.command.SubscriptionCommandSender;
 import io.zeebe.engine.processing.streamprocessor.ProcessingContext;
@@ -111,7 +111,7 @@ public final class EngineProcessors {
             writers,
             timerChecker);
 
-    JobEventProcessors.addJobProcessors(
+    JobCommandProcessors.addJobProcessors(
         typedRecordProcessors,
         zeebeState,
         onJobsAvailableCallback,
