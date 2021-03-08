@@ -20,7 +20,7 @@ import io.zeebe.engine.processing.deployment.distribute.DeploymentDistributeProc
 import io.zeebe.engine.processing.deployment.distribute.DeploymentDistributor;
 import io.zeebe.engine.processing.deployment.distribute.DeploymentRedistributor;
 import io.zeebe.engine.processing.incident.IncidentEventProcessors;
-import io.zeebe.engine.processing.job.JobEventProcessors;
+import io.zeebe.engine.processing.job.JobCommandProcessors;
 import io.zeebe.engine.processing.message.MessageEventProcessors;
 import io.zeebe.engine.processing.message.command.SubscriptionCommandSender;
 import io.zeebe.engine.processing.streamprocessor.ProcessingContext;
@@ -107,9 +107,9 @@ public final class EngineProcessors {
             writers,
             timerChecker);
 
-    addJobProcessors(
-        zeebeState,
+    JobCommandProcessors.addJobProcessors(
         typedRecordProcessors,
+        zeebeState,
         onJobsAvailableCallback,
         eventTriggerBehavior,
         maxFragmentSize,
@@ -196,22 +196,6 @@ public final class EngineProcessors {
       final Writers writers) {
     IncidentEventProcessors.addProcessors(
         typedRecordProcessors, zeebeState, bpmnStreamProcessor, writers);
-  }
-
-  private static void addJobProcessors(
-      final MutableZeebeState zeebeState,
-      final TypedRecordProcessors typedRecordProcessors,
-      final Consumer<String> onJobsAvailableCallback,
-      final EventTriggerBehavior eventTriggerBehavior,
-      final int maxFragmentSize,
-      final Writers writers) {
-    JobEventProcessors.addJobProcessors(
-        typedRecordProcessors,
-        zeebeState,
-        onJobsAvailableCallback,
-        eventTriggerBehavior,
-        maxFragmentSize,
-        writers);
   }
 
   private static void addMessageProcessors(
