@@ -112,9 +112,8 @@ public final class ServiceTaskProcessor implements BpmnElementProcessor<Executab
         .ifRightOrLeft(
             ok -> {
               eventSubscriptionBehavior.unsubscribeFromEvents(context);
-              final var completedContext =
-                  stateTransitionBehavior.transitionToCompletedWithParentNotification(
-                      element, context);
+              final var completedContext = stateTransitionBehavior.transitionToCompleted(context);
+
               stateTransitionBehavior.takeOutgoingSequenceFlows(element, completedContext);
             },
             failure -> incidentBehavior.createIncident(failure, context));
@@ -133,12 +132,10 @@ public final class ServiceTaskProcessor implements BpmnElementProcessor<Executab
     eventSubscriptionBehavior.unsubscribeFromEvents(context);
 
     final var terminatedContext = stateTransitionBehavior.transitionToTerminated(context);
+    eventSubscriptionBehavior.publishTriggeredBoundaryEvent(terminatedContext);
 
-    eventSubscriptionBehavior.publishTriggeredBoundaryEvent(context);
-
-    incidentBehavior.resolveIncidents(context);
-
-    stateTransitionBehavior.onElementTerminated(element, context);
+    incidentBehavior.resolveIncidents(terminatedContext);
+    stateTransitionBehavior.onElementTerminated(element, terminatedContext);
   }
 
   @Override

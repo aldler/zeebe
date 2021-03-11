@@ -36,8 +36,8 @@ public final class BpmnElementProcessors {
 
   public BpmnElementProcessors(
       final BpmnBehaviors bpmnBehaviors,
-      final MutableZeebeState zeebeState,
-      final Writers writers) {
+      final Writers writers,
+      final MutableZeebeState zeebeState) {
     // tasks
     processors.put(
         BpmnElementType.SERVICE_TASK,
