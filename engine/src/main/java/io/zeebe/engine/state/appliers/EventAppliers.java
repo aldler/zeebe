@@ -50,7 +50,6 @@ public final class EventAppliers implements EventApplier {
                   intent.getClass().getSimpleName(),
                   intent);
 
-  @SuppressWarnings("rawtypes")
   private final Map<Intent, TypedEventApplier> mapping = new HashMap<>();
 
   public EventAppliers(final MutableZeebeState state) {
@@ -111,7 +110,8 @@ public final class EventAppliers implements EventApplier {
             elementInstanceState, processState, variableState, eventScopeInstanceState));
     register(
         ProcessInstanceIntent.ELEMENT_ACTIVATED,
-        new ProcessInstanceElementActivatedApplier(elementInstanceState));
+        new ProcessInstanceElementActivatedApplier(
+            elementInstanceState, processState, eventScopeInstanceState));
     register(
         ProcessInstanceIntent.ELEMENT_COMPLETING,
         new ProcessInstanceElementCompletingApplier(elementInstanceState));
@@ -217,7 +217,6 @@ public final class EventAppliers implements EventApplier {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public void applyState(final long key, final Intent intent, final RecordValue value) {
     final var eventApplier =
         mapping.getOrDefault(intent, UNIMPLEMENTED_EVENT_APPLIER.apply(intent));
