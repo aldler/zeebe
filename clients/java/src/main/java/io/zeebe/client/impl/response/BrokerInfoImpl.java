@@ -15,11 +15,10 @@
  */
 package io.zeebe.client.impl.response;
 
+import io.netty.util.NetUtil;
 import io.zeebe.client.api.response.BrokerInfo;
 import io.zeebe.client.api.response.PartitionInfo;
-import io.zeebe.client.impl.util.SocketUtil;
 import io.zeebe.gateway.protocol.GatewayOuterClass;
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,7 +59,7 @@ public final class BrokerInfoImpl implements BrokerInfo {
 
   @Override
   public String getAddress() {
-    return SocketUtil.toHostAndPortString(new InetSocketAddress(host, port));
+    return NetUtil.toSocketAddressString(host, port);
   }
 
   @Override
