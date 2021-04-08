@@ -173,9 +173,9 @@ pipeline {
                 stage('Test (Java)') {
                     environment {
                         SUREFIRE_REPORT_NAME_SUFFIX = 'java-testrun'
-                        MAVEN_PARALLELISM = 2
-                        SUREFIRE_FORK_COUNT = 6
-                        JUNIT_THREAD_COUNT = 6
+                        MAVEN_PARALLELISM = 4
+                        SUREFIRE_FORK_COUNT = 4
+                        JUNIT_THREAD_COUNT = 4
                     }
 
                     steps {
@@ -260,8 +260,8 @@ pipeline {
                             environment {
                                 SUREFIRE_REPORT_NAME_SUFFIX = 'it-testrun'
                                 MAVEN_PARALLELISM = 2
-                                SUREFIRE_FORK_COUNT = 6
-                                JUNIT_THREAD_COUNT = 6
+                                SUREFIRE_FORK_COUNT = 10
+                                JUNIT_THREAD_COUNT = 4
                             }
 
                             steps {

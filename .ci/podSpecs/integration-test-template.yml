@@ -29,11 +29,11 @@ spec:
           value: tcp://localhost:2375
       resources:
         limits:
-          cpu: 12
-          memory: 48Gi
+          cpu: 18
+          memory: 60Gi
         requests:
-          cpu: 12
-          memory: 48Gi
+          cpu: 18
+          memory: 60Gi
       securityContext:
         privileged: true
     - name: docker
@@ -51,8 +51,8 @@ spec:
       tty: true
       resources:
         limits:
-          cpu: 18
-          memory: 60Gi
+          cpu: 12
+          memory: 48Gi
         requests:
-          cpu: 18
-          memory: 60Gi
+          cpu: 12
+          memory: 48Gi
