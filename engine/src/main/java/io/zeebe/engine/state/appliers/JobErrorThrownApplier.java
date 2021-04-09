@@ -47,9 +47,6 @@ public class JobErrorThrownApplier implements TypedEventApplier<JobIntent, JobRe
       final var serviceTaskInstance = elementInstanceState.getInstance(job.getElementInstanceKey());
 
       removeJobReference(jobKey, job, serviceTaskInstance);
-
-      // TODO (#6472) remove this after the right event is being written
-      triggerEvent(jobKey, job, serviceTaskInstance);
     }
   }
 

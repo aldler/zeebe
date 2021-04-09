@@ -10,6 +10,7 @@ package io.zeebe.engine.processing;
 import static io.zeebe.protocol.record.intent.DeploymentIntent.CREATE;
 
 import io.zeebe.el.ExpressionLanguageFactory;
+import io.zeebe.engine.processing.bpmn.behavior.BpmnEventPublicationBehavior;
 import io.zeebe.engine.processing.common.CatchEventBehavior;
 import io.zeebe.engine.processing.common.EventTriggerBehavior;
 import io.zeebe.engine.processing.common.ExpressionProcessor;
@@ -77,6 +78,9 @@ public final class EngineProcessors {
         new EventTriggerBehavior(
             zeebeState.getKeyGenerator(), catchEventBehavior, writers, zeebeState);
 
+    final var eventPublicationBehavior =
+        new BpmnEventPublicationBehavior(zeebeState, eventTriggerBehavior, writers);
+
     addDeploymentRelatedProcessorAndServices(
         catchEventBehavior,
         partitionId,
@@ -112,6 +116,7 @@ public final class EngineProcessors {
         zeebeState,
         onJobsAvailableCallback,
         eventTriggerBehavior,
+        eventPublicationBehavior,
         maxFragmentSize,
         writers);
 
