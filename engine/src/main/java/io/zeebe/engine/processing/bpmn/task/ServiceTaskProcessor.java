@@ -60,14 +60,16 @@ public final class ServiceTaskProcessor implements BpmnElementProcessor<Executab
 
   @Override
   public void onComplete(final ExecutableServiceTask element, final BpmnElementContext context) {
+
     variableMappingBehavior
         .applyOutputMappings(context, element)
         .ifRightOrLeft(
             ok -> {
               eventSubscriptionBehavior.unsubscribeFromEvents(context);
-              final var completedContext = stateTransitionBehavior.transitionToCompleted(context);
-
-              stateTransitionBehavior.takeOutgoingSequenceFlows(element, completedContext);
+              final var completed =
+                  stateTransitionBehavior.transitionToCompletedWithParentNotification(
+                      element, context);
+              stateTransitionBehavior.takeOutgoingSequenceFlows(element, completed);
             },
             failure -> incidentBehavior.createIncident(failure, context));
   }
@@ -76,12 +78,7 @@ public final class ServiceTaskProcessor implements BpmnElementProcessor<Executab
   public void onTerminate(final ExecutableServiceTask element, final BpmnElementContext context) {
     jobBehavior.cancelJob(context);
     eventSubscriptionBehavior.unsubscribeFromEvents(context);
-
-    final var terminatedContext = stateTransitionBehavior.transitionToTerminated(context);
-    eventSubscriptionBehavior.publishTriggeredBoundaryEvent(terminatedContext);
-
-    incidentBehavior.resolveIncidents(terminatedContext);
-    stateTransitionBehavior.onElementTerminated(element, terminatedContext);
+    incidentBehavior.resolveIncidents(context);
 
     eventSubscriptionBehavior
         .findEventTrigger(context)
