@@ -58,21 +58,6 @@ public final class ServiceTaskProcessor implements BpmnElementProcessor<Executab
             failure -> incidentBehavior.createIncident(failure, context));
   }
 
-  private void activateServiceTask(
-      final ExecutableServiceTask element,
-      final BpmnElementContext context,
-      final String jobType,
-      final Long retries) {
-
-    variableMappingBehavior
-        .applyInputMappings(context, element)
-        .flatMap(ok -> eventSubscriptionBehavior.subscribeToEvents(element, context))
-        .map(ok -> stateTransitionBehavior.transitionToActivated(context))
-        .ifRightOrLeft(
-            activated -> jobBehavior.createJob(activated, element, jobType, retries.intValue()),
-            failure -> incidentBehavior.createIncident(failure, context));
-  }
-
   @Override
   public void onComplete(final ExecutableServiceTask element, final BpmnElementContext context) {
     variableMappingBehavior
@@ -97,11 +82,38 @@ public final class ServiceTaskProcessor implements BpmnElementProcessor<Executab
 
     incidentBehavior.resolveIncidents(terminatedContext);
     stateTransitionBehavior.onElementTerminated(element, terminatedContext);
+
+    eventSubscriptionBehavior
+        .findEventTrigger(context)
+        .ifPresentOrElse(
+            eventTrigger -> {
+              final var terminated = stateTransitionBehavior.transitionToTerminated(context);
+              eventSubscriptionBehavior.activateTriggeredEvent(terminated, eventTrigger);
+            },
+            () -> {
+              final var terminated = stateTransitionBehavior.transitionToTerminated(context);
+              stateTransitionBehavior.onElementTerminated(element, terminated);
+            });
   }
 
   @Override
   public void onEventOccurred(
       final ExecutableServiceTask element, final BpmnElementContext context) {
     eventSubscriptionBehavior.triggerBoundaryEvent(element, context);
+  }
+
+  private void activateServiceTask(
+      final ExecutableServiceTask element,
+      final BpmnElementContext context,
+      final String jobType,
+      final Long retries) {
+
+    variableMappingBehavior
+        .applyInputMappings(context, element)
+        .flatMap(ok -> eventSubscriptionBehavior.subscribeToEvents(element, context))
+        .map(ok -> stateTransitionBehavior.transitionToActivated(context))
+        .ifRightOrLeft(
+            activated -> jobBehavior.createJob(activated, element, jobType, retries.intValue()),
+            failure -> incidentBehavior.createIncident(failure, context));
   }
 }
