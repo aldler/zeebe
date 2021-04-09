@@ -94,7 +94,8 @@ public final class MappingIncidentTest {
             .getFirst();
 
     assertThat(incidentEvent.getKey()).isGreaterThan(0);
-    assertThat(createIncidentEvent.getSourceRecordPosition()).isEqualTo(failureEvent.getPosition());
+    assertThat(createIncidentEvent.getSourceRecordPosition())
+        .isEqualTo(failureEvent.getSourceRecordPosition());
     assertThat(incidentEvent.getSourceRecordPosition())
         .isEqualTo(createIncidentEvent.getPosition());
     assertThat(incidentEvent.getValue().getVariableScopeKey()).isEqualTo(failureEvent.getKey());
@@ -198,7 +199,8 @@ public final class MappingIncidentTest {
             .getFirst();
 
     assertThat(incidentEvent.getKey()).isGreaterThan(0);
-    assertThat(createIncidentEvent.getSourceRecordPosition()).isEqualTo(failureEvent.getPosition());
+    assertThat(createIncidentEvent.getSourceRecordPosition())
+        .isEqualTo(failureEvent.getSourceRecordPosition());
     assertThat(incidentEvent.getSourceRecordPosition())
         .isEqualTo(createIncidentEvent.getPosition());
 
@@ -520,7 +522,7 @@ public final class MappingIncidentTest {
             .getFirst();
 
     assertThat(incidentResolvedEvent.getKey()).isEqualTo(incidentCreatedEvent.getKey());
-    assertThat(activityTerminated.getPosition())
+    assertThat(activityTerminated.getSourceRecordPosition())
         .isEqualTo(incidentResolvedEvent.getSourceRecordPosition());
 
     Assertions.assertThat(incidentResolvedEvent.getValue())

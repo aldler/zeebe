@@ -76,12 +76,7 @@ public final class ServiceTaskProcessor implements BpmnElementProcessor<Executab
   public void onTerminate(final ExecutableServiceTask element, final BpmnElementContext context) {
     jobBehavior.cancelJob(context);
     eventSubscriptionBehavior.unsubscribeFromEvents(context);
-
-    final var terminatedContext = stateTransitionBehavior.transitionToTerminated(context);
-    eventSubscriptionBehavior.publishTriggeredBoundaryEvent(terminatedContext);
-
-    incidentBehavior.resolveIncidents(terminatedContext);
-    stateTransitionBehavior.onElementTerminated(element, terminatedContext);
+    incidentBehavior.resolveIncidents(context);
 
     eventSubscriptionBehavior
         .findEventTrigger(context)

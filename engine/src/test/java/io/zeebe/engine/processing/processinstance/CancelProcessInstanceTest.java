@@ -115,11 +115,12 @@ public final class CancelProcessInstanceTest {
             .asList();
 
     assertThat(processEvents)
-        .hasSize(5)
+        .hasSize(6)
         .extracting(e -> e.getValue().getElementId(), e -> e.getIntent())
         .containsSequence(
             tuple("", CANCEL),
             tuple("PROCESS", ProcessInstanceIntent.ELEMENT_TERMINATING),
+            tuple("task", ProcessInstanceIntent.TERMINATE_ELEMENT),
             tuple("task", ProcessInstanceIntent.ELEMENT_TERMINATING),
             tuple("task", ELEMENT_TERMINATED),
             tuple("PROCESS", ELEMENT_TERMINATED));
@@ -178,12 +179,13 @@ public final class CancelProcessInstanceTest {
             .asList();
 
     assertThat(processEvents)
-        .hasSize(7)
+        .hasSize(8)
         .extracting(e -> e.getValue().getElementId(), e -> e.getIntent())
         .containsSequence(
             tuple("", ProcessInstanceIntent.CANCEL),
             tuple("SUB_PROCESS_PROCESS", ProcessInstanceIntent.ELEMENT_TERMINATING),
             tuple("subProcess", ProcessInstanceIntent.ELEMENT_TERMINATING),
+            tuple("task", ProcessInstanceIntent.TERMINATE_ELEMENT),
             tuple("task", ProcessInstanceIntent.ELEMENT_TERMINATING),
             tuple("task", ELEMENT_TERMINATED),
             tuple("subProcess", ELEMENT_TERMINATED),
@@ -332,7 +334,8 @@ public final class CancelProcessInstanceTest {
             .getFirst();
 
     assertThat(jobCanceledEvent.getKey()).isEqualTo(jobCreatedEvent.getKey());
-    assertThat(jobCancelCmd.getSourceRecordPosition()).isEqualTo(terminateActivity.getPosition());
+    assertThat(jobCancelCmd.getSourceRecordPosition())
+        .isEqualTo(terminateActivity.getSourceRecordPosition());
     assertThat(jobCanceledEvent.getSourceRecordPosition()).isEqualTo(jobCancelCmd.getPosition());
 
     final JobRecordValue jobCanceledEventValue = jobCanceledEvent.getValue();
