@@ -173,7 +173,7 @@ pipeline {
                 stage('Test (Java)') {
                     environment {
                         SUREFIRE_REPORT_NAME_SUFFIX = 'java-testrun'
-                        MAVEN_PARALLELISM = 4
+                        MAVEN_PARALLELISM = 5
                         SUREFIRE_FORK_COUNT = 20
                         JUNIT_THREAD_COUNT = 4
                     }
@@ -260,7 +260,7 @@ pipeline {
                             environment {
                                 SUREFIRE_REPORT_NAME_SUFFIX = 'it-testrun'
                                 MAVEN_PARALLELISM = 2
-                                SUREFIRE_FORK_COUNT = 20
+                                SUREFIRE_FORK_COUNT = 50
                                 JUNIT_THREAD_COUNT = 4
                             }
 
@@ -279,6 +279,7 @@ pipeline {
                                 failure {
                                     zip zipFile: 'test-reports-it.zip', archive: true, glob: "**/*/surefire-reports/**"
                                     zip zipFile: 'test-errors-it.zip', archive: true, glob: "**/hs_err_*.log"
+                                    zip zipFile: 'test-outputs-it.zip', archive: true, glob: "**/*/surefire-"
                                 }
                             }
                         }
