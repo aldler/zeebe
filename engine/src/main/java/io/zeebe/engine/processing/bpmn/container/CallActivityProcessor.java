@@ -93,7 +93,7 @@ public final class CallActivityProcessor
         .ifRightOrLeft(
             ok -> {
               eventSubscriptionBehavior.unsubscribeFromEvents(context);
-              stateTransitionBehavior.transitionToCompleted(context);
+              stateTransitionBehavior.transitionToCompletedWithParentNotification(element, context);
             },
             failure -> incidentBehavior.createIncident(failure, context));
   }
@@ -132,7 +132,7 @@ public final class CallActivityProcessor
       final BpmnElementContext childContext) {}
 
   @Override
-  public void onChildCompleted(
+  public void beforeExecutionPathCompleting(
       final ExecutableCallActivity element,
       final BpmnElementContext callActivityContext,
       final BpmnElementContext childContext) {
@@ -156,6 +156,12 @@ public final class CallActivityProcessor
         throw new BpmnProcessingException(callActivityContext, message);
     }
   }
+
+  @Override
+  public void afterExecutionPathCompleting(
+      final ExecutableCallActivity element,
+      final BpmnElementContext flowScopeContext,
+      final BpmnElementContext childContext) {}
 
   @Override
   public void onChildTerminated(

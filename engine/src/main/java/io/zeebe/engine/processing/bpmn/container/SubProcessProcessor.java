@@ -79,7 +79,7 @@ public final class SubProcessProcessor
         .ifRightOrLeft(
             ok -> {
               eventSubscriptionBehavior.unsubscribeFromEvents(context);
-              stateTransitionBehavior.transitionToCompleted(context);
+              stateTransitionBehavior.transitionToCompletedWithParentNotification(element, context);
             },
             failure -> incidentBehavior.createIncident(failure, context));
   }
@@ -132,11 +132,16 @@ public final class SubProcessProcessor
       final BpmnElementContext childContext) {}
 
   @Override
-  public void onChildCompleted(
+  public void beforeExecutionPathCompleting(
+      final ExecutableFlowElementContainer element,
+      final BpmnElementContext flowScopeContext,
+      final BpmnElementContext childContext) {}
+
+  @Override
+  public void afterExecutionPathCompleting(
       final ExecutableFlowElementContainer element,
       final BpmnElementContext flowScopeContext,
       final BpmnElementContext childContext) {
-
     if (stateBehavior.canBeCompleted(childContext)) {
       stateTransitionBehavior.transitionToCompleting(flowScopeContext);
     }

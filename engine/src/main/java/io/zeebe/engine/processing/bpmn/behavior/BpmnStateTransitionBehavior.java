@@ -164,6 +164,21 @@ public final class BpmnStateTransitionBehavior {
     }
   }
 
+  public <T extends ExecutableFlowNode>
+      BpmnElementContext transitionToCompletedWithParentNotification(
+          final T element, final BpmnElementContext context) {
+    final boolean endOfExecutionPath = !element.getOutgoing().isEmpty();
+
+    if (endOfExecutionPath) {
+      beforeExecutionPathCompleting(element, context);
+    }
+    final var completed = transitionToCompleted(context);
+    if (endOfExecutionPath) {
+      afterExecutionPathCompleting(element, completed);
+    }
+    return completed;
+  }
+
   /** @return context with updated intent */
   public BpmnElementContext transitionToCompleted(final BpmnElementContext context) {
     final var transitionedContext = transitionTo(context, ProcessInstanceIntent.ELEMENT_COMPLETED);
@@ -377,25 +392,29 @@ public final class BpmnStateTransitionBehavior {
   public <T extends ExecutableFlowNode> void takeOutgoingSequenceFlows(
       final T element, final BpmnElementContext context) {
 
-    final var outgoingSequenceFlows = element.getOutgoing();
-    if (outgoingSequenceFlows.isEmpty()) {
-      // behaves like an implicit end event
-
-      onElementCompleted(element, context);
-
-    } else {
-      outgoingSequenceFlows.forEach(sequenceFlow -> takeSequenceFlow(context, sequenceFlow));
-    }
+    element.getOutgoing().forEach(sequenceFlow -> takeSequenceFlow(context, sequenceFlow));
   }
 
-  public void onElementCompleted(
+  public void beforeExecutionPathCompleting(
       final ExecutableFlowElement element, final BpmnElementContext childContext) {
 
     invokeElementContainerIfPresent(
         element,
         childContext,
         (containerProcessor, containerScope, containerContext) ->
-            containerProcessor.onChildCompleted(containerScope, containerContext, childContext));
+            containerProcessor.beforeExecutionPathCompleting(
+                containerScope, containerContext, childContext));
+  }
+
+  public void afterExecutionPathCompleting(
+      final ExecutableFlowElement element, final BpmnElementContext childContext) {
+
+    invokeElementContainerIfPresent(
+        element,
+        childContext,
+        (containerProcessor, containerScope, containerContext) ->
+            containerProcessor.afterExecutionPathCompleting(
+                containerScope, containerContext, childContext));
   }
 
   public void onElementTerminated(

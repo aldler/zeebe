@@ -94,7 +94,8 @@ public final class ProcessProcessor
     final var parentProcessInstanceKey = context.getParentProcessInstanceKey();
     if (parentProcessInstanceKey > 0) {
       // process instance is created by a call activity
-      stateTransitionBehavior.onElementCompleted(element, context);
+      stateTransitionBehavior.beforeExecutionPathCompleting(element, context);
+      stateTransitionBehavior.afterExecutionPathCompleting(element, context);
     }
 
     if (element.hasNoneStartEvent()) {
@@ -166,11 +167,16 @@ public final class ProcessProcessor
       final BpmnElementContext childContext) {}
 
   @Override
-  public void onChildCompleted(
+  public void beforeExecutionPathCompleting(
+      final ExecutableFlowElementContainer element,
+      final BpmnElementContext flowScopeContext,
+      final BpmnElementContext childContext) {}
+
+  @Override
+  public void afterExecutionPathCompleting(
       final ExecutableFlowElementContainer element,
       final BpmnElementContext flowScopeContext,
       final BpmnElementContext childContext) {
-
     if (stateBehavior.canBeCompleted(childContext)) {
       stateTransitionBehavior.transitionToCompleting(flowScopeContext);
     }

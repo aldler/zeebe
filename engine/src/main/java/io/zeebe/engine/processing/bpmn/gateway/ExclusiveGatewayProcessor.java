@@ -51,9 +51,7 @@ public final class ExclusiveGatewayProcessor
       final ExecutableExclusiveGateway element, final BpmnElementContext activating) {
     if (element.getOutgoing().isEmpty()) {
       // there are no flows to take: the gateway is an implicit end for the flow scope
-      final BpmnElementContext completed = transitionToCompleted(activating);
-      stateTransitionBehavior.onElementCompleted(element, completed);
-
+      stateTransitionBehavior.transitionToCompletedWithParentNotification(element, activating);
     } else {
       // find outgoing sequence flow with fulfilled condition or the default
       findSequenceFlowToTake(element, activating)
