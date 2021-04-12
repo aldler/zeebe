@@ -25,10 +25,10 @@ spec:
           value: tcp://localhost:2375
       resources:
         limits:
-          cpu: 12
+          cpu: 18
           memory: 50Gi
         requests:
-          cpu: 12
+          cpu: 18
           memory: 50Gi
       securityContext:
         privileged: true
@@ -84,8 +84,8 @@ spec:
       tty: true
       resources:
         limits:
-          cpu: 12
+          cpu: 6
           memory: 50Gi
         requests:
-          cpu: 12
+          cpu: 6
           memory: 50Gi
