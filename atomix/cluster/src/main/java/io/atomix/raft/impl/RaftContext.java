@@ -900,6 +900,10 @@ public class RaftContext implements AutoCloseable {
     }
   }
 
+  public void setLastAppendedIndex(final long index) {
+    meta.storeLastAppendedIndex(index);
+  }
+
   /**
    * Returns the execution context.
    *

@@ -17,8 +17,10 @@ package io.atomix.raft.roles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,6 +54,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 public class LeaderRoleTest {
@@ -342,6 +345,54 @@ public class LeaderRoleTest {
     // then
     assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue();
     verify(leaderRole.raft, timeout(2000).atLeast(1)).transition(Role.FOLLOWER);
+  }
+
+  @Test
+  public void shouldStoreLastAppendedIndex() throws InterruptedException {
+    // given
+    final ByteBuffer data = ByteBuffer.allocate(Integer.BYTES).putInt(0, 1);
+    final CountDownLatch latch = new CountDownLatch(1);
+
+    // when
+    leaderRole.appendEntry(
+        1,
+        1,
+        data,
+        new AppendListener() {
+          @Override
+          public void onWrite(final IndexedRaftLogEntry indexed) {
+            latch.countDown();
+          }
+        });
+
+    // then
+    assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue();
+    verify(leaderRole.raft).setLastAppendedIndex(ArgumentMatchers.eq(1L));
+  }
+
+  @Test
+  public void shouldNotStoreLastAppendedIfAppendFails() throws InterruptedException {
+    // given
+    when(log.append(any(RaftLogEntry.class)))
+        .thenThrow(new JournalException.OutOfDiskSpace("expected"));
+    final ByteBuffer data = ByteBuffer.allocate(Integer.BYTES).putInt(0, 1);
+    final CountDownLatch latch = new CountDownLatch(1);
+
+    // when
+    leaderRole.appendEntry(
+        1,
+        1,
+        data,
+        new AppendListener() {
+          @Override
+          public void onWriteError(final Throwable error) {
+            latch.countDown();
+          }
+        });
+
+    // then
+    assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue();
+    verify(context, never()).setLastAppendedIndex(anyLong());
   }
 
   private static class TestIndexedRaftLogEntry implements IndexedRaftLogEntry {

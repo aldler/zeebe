@@ -522,15 +522,19 @@ public class PassiveRole extends InactiveRole {
       }
 
       // Iterate through entries and append them.
-      for (int i = 0; i < request.entries().size(); ++i) {
+      for (final PersistedRaftRecord entry : request.entries()) {
         final long index = ++lastLogIndex;
-        final PersistedRaftRecord entry = request.entries().get(i);
 
         // Get the last entry written to the log by the writer.
         final IndexedRaftLogEntry lastEntry = raft.getLog().getLastEntry();
 
         final boolean failedToAppend = tryToAppend(future, reader, entry, index, lastEntry);
         if (failedToAppend) {
+          if (raft.getLog().shouldFlushExplicitly()) {
+            raft.getLog().flush();
+          }
+          raft.setLastAppendedIndex(index - 1);
+
           return;
         }
 
@@ -556,6 +560,8 @@ public class PassiveRole extends InactiveRole {
     if (raft.getLog().shouldFlushExplicitly()) {
       raft.getLog().flush();
     }
+
+    raft.setLastAppendedIndex(lastLogIndex);
 
     // Return a successful append response.
     succeedAppend(lastLogIndex, future);
@@ -648,7 +654,7 @@ public class PassiveRole extends InactiveRole {
     try {
       final IndexedRaftLogEntry indexed;
       indexed = raft.getLog().append(entry);
-
+      // TODO: if we "failAppend" we need to write the last written index to the store
       log.trace("Appended {}", indexed);
       raft.getReplicationMetrics().setAppendIndex(indexed.index());
     } catch (final JournalException.OutOfDiskSpace e) {
