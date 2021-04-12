@@ -279,7 +279,7 @@ pipeline {
                                 failure {
                                     zip zipFile: 'test-reports-it.zip', archive: true, glob: "**/*/surefire-reports/**"
                                     zip zipFile: 'test-errors-it.zip', archive: true, glob: "**/hs_err_*.log"
-                                    zip zipFile: 'test-outputs-it.zip', archive: true, glob: "**/*/surefire-"
+                                    zip zipFile: 'test-dumps-it.zip', archive: true, glob: "**/*.dump*"
                                 }
                             }
                         }
@@ -295,6 +295,8 @@ pipeline {
                 failure {
                     zip zipFile: 'test-reports.zip', archive: true, glob: "**/*/surefire-reports/**"
                     zip zipFile: 'test-errors.zip', archive: true, glob: "**/hs_err_*.log"
+                    zip zipFile: 'test-dumps.zip', archive: true, glob: "**/*.dump*"
+
                     dir(itAgentUnstashDirectory) {
                         unstash name: itFlakyTestStashName
                     }
