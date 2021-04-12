@@ -26,11 +26,11 @@ public final class SocketUtil {
   // defines the upper bound for how many separate maven processes (not forks or maven parallel
   // build count) can be ran in parallel on the same machine, which is typically defined in the CI
   // pipeline (e.g. Jenkinsfile)
-  private static final int MAX_TEST_STAGES = 10;
+  private static final int MAX_TEST_STAGES = 3;
   // defines the upper bound for how many forks can be ran per stage; this should be the number of
   // maven threads (-T option) times the configured surefire/failsafe forkCount (see the surefire
   // or failsafe config in the pom)
-  private static final int MAX_TEST_FORKS_PER_STAGE = 100;
+  private static final int MAX_TEST_FORKS_PER_STAGE = 80;
   private static final int PORT_RANGE_PER_TEST_FORK = 100;
   private static final int PORT_RANGE_PER_TEST_STAGE =
       PORT_RANGE_PER_TEST_FORK * MAX_TEST_FORKS_PER_STAGE;
