@@ -44,6 +44,7 @@ pipeline {
     environment {
         NEXUS = credentials("camunda-nexus")
         SONARCLOUD_TOKEN = credentials('zeebe-sonarcloud-token')
+        DOCKER_BUILDKIT = "1"
     }
 
     triggers {
@@ -108,7 +109,6 @@ pipeline {
 
         stage('Build Docker Images') {
             environment {
-                DOCKER_BUILDKIT = "1"
                 IMAGE = "camunda/zeebe"
                 TAG = 'current-test'
             }
@@ -241,7 +241,6 @@ pipeline {
 
                         stage('Build Docker Image') {
                             environment {
-                                DOCKER_BUILDKIT = "1"
                                 IMAGE = "camunda/zeebe"
                                 TAG = 'current-test'
                             }
