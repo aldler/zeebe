@@ -38,6 +38,7 @@ import java.util.NavigableMap;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.locks.StampedLock;
 import org.agrona.DirectBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +62,7 @@ public class SegmentedJournal implements Journal {
   private final long minFreeDiskSpace;
   private final JournalIndex journalIndex;
   private final SegmentedJournalWriter writer;
+  private final StampedLock rwlock = new StampedLock();
 
   public SegmentedJournal(
       final String name,
@@ -108,9 +110,14 @@ public class SegmentedJournal implements Journal {
   public void deleteAfter(final long indexExclusive) {
     journalMetrics.observeSegmentTruncation(
         () -> {
-          writer.deleteAfter(indexExclusive);
-          // Reset segment readers.
-          resetAdvancedReaders(indexExclusive + 1);
+          final var lock = rwlock.writeLock();
+          try {
+            writer.deleteAfter(indexExclusive);
+            // Reset segment readers.
+            resetAdvancedReaders(indexExclusive + 1);
+          } finally {
+            rwlock.unlockWrite(lock);
+          }
         });
   }
 
@@ -151,8 +158,14 @@ public class SegmentedJournal implements Journal {
 
   @Override
   public void reset(final long nextIndex) {
-    journalIndex.clear();
-    writer.reset(nextIndex);
+    final var lock = rwlock.writeLock();
+    try {
+      journalIndex.clear();
+      writer.reset(nextIndex);
+      resetHead(nextIndex);
+    } finally {
+      rwlock.unlockWrite(lock);
+    }
   }
 
   @Override
@@ -544,7 +557,7 @@ public class SegmentedJournal implements Journal {
   void resetHead(final long index) {
     for (final SegmentedJournalReader reader : readers) {
       if (reader.getNextIndex() <= index) {
-        reader.seek(index);
+        reader.unsafeSeek(index);
       }
     }
   }
@@ -557,7 +570,7 @@ public class SegmentedJournal implements Journal {
   void resetAdvancedReaders(final long index) {
     for (final SegmentedJournalReader reader : readers) {
       if (reader.getNextIndex() > index) {
-        reader.seek(index);
+        reader.unsafeSeek(index);
       }
     }
   }
@@ -568,5 +581,13 @@ public class SegmentedJournal implements Journal {
 
   public JournalIndex getJournalIndex() {
     return journalIndex;
+  }
+
+  long acquireReadlock() {
+    return rwlock.readLock();
+  }
+
+  void releaseReadlock(final long lock) {
+    rwlock.unlockRead(lock);
   }
 }
