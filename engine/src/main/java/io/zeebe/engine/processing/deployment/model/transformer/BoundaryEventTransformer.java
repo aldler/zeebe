@@ -41,5 +41,6 @@ public final class BoundaryEventTransformer implements ModelElementTransformer<B
         process.getElementById(attachedToActivity.getId(), ExecutableActivity.class);
 
     attachedToElement.attach(element);
+    element.attachedTo(attachedToElement);
   }
 }

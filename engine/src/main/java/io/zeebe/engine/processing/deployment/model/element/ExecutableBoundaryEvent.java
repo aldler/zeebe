@@ -9,6 +9,8 @@ package io.zeebe.engine.processing.deployment.model.element;
 
 public class ExecutableBoundaryEvent extends ExecutableCatchEventElement {
 
+  private ExecutableActivity eventScope;
+
   public ExecutableBoundaryEvent(final String id) {
     super(id);
   }
@@ -16,5 +18,13 @@ public class ExecutableBoundaryEvent extends ExecutableCatchEventElement {
   @Override
   public boolean isInterrupting() {
     return interrupting();
+  }
+
+  public void attachedTo(final ExecutableActivity eventScope) {
+    this.eventScope = eventScope;
+  }
+
+  public ExecutableActivity getEventScope() {
+    return eventScope;
   }
 }
