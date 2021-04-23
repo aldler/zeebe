@@ -20,7 +20,6 @@ import io.zeebe.engine.state.immutable.ProcessState;
 import io.zeebe.engine.state.instance.ElementInstance;
 import io.zeebe.protocol.impl.record.value.message.MessageRecord;
 import io.zeebe.protocol.impl.record.value.message.MessageStartEventSubscriptionRecord;
-import io.zeebe.protocol.impl.record.value.processinstance.ProcessEventRecord;
 import io.zeebe.protocol.impl.record.value.processinstance.ProcessInstanceRecord;
 import io.zeebe.protocol.record.intent.MessageStartEventSubscriptionIntent;
 import io.zeebe.protocol.record.intent.ProcessEventIntent;
@@ -34,7 +33,6 @@ public final class EventHandle {
   private static final DirectBuffer NO_VARIABLES = new UnsafeBuffer();
 
   private final ProcessInstanceRecord recordForPICreation = new ProcessInstanceRecord();
-  private final ProcessEventRecord processEventRecord = new ProcessEventRecord();
   private final MessageStartEventSubscriptionRecord startEventSubscriptionRecord =
       new MessageStartEventSubscriptionRecord();
 
@@ -82,16 +80,7 @@ public final class EventHandle {
       final ElementInstance eventScope,
       final DirectBuffer catchEventId,
       final DirectBuffer variables) {
-    final var newElementInstanceKey = keyGenerator.nextKey();
-    processEventRecord.reset();
-    processEventRecord
-        .setScopeKey(eventScope.getKey())
-        .setTargetElementIdBuffer(catchEventId)
-        .setVariablesBuffer(variables)
-        .setProcessDefinitionKey(eventScope.getValue().getProcessDefinitionKey())
-        .setProcessInstanceKey(eventScope.getValue().getProcessInstanceKey());
-    stateWriter.appendFollowUpEvent(
-        newElementInstanceKey, ProcessEventIntent.TRIGGERING, processEventRecord);
+    eventTriggerBehavior.triggeringProcessEvent(eventScope, catchEventId, variables);
   }
 
   public void activateElement(
@@ -123,7 +112,7 @@ public final class EventHandle {
             eventScopeKey, ProcessInstanceIntent.TERMINATE_ELEMENT, elementRecord);
       } else {
         eventTriggerBehavior.activateTriggeredEvent(
-            catchEvent, elementRecord.getFlowScopeKey(), elementRecord, variables);
+            catchEvent, eventScopeKey, elementRecord.getFlowScopeKey(), elementRecord, variables);
       }
     }
   }
